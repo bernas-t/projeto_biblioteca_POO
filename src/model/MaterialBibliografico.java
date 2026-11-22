@@ -9,7 +9,7 @@ public abstract class MaterialBibliografico implements Serializable {
     private int AnoPublicacao;
     private boolean Disponivel;
 //cadastrar novos livros
-    public MaterialBibliografico(int id, String titulo, int AnoPublicacao, boolean Disponivel) throws MaterialIndisponivelException{
+    public MaterialBibliografico(int id, String titulo, int AnoPublicacao) throws MaterialIndisponivelException{
         if(titulo == null){
             throw new MaterialIndisponivelException();
         }
@@ -19,7 +19,7 @@ public abstract class MaterialBibliografico implements Serializable {
     this.Disponivel = true;        
     }
 
-    public abstract void ExibirDados();
+    public abstract void ExibirDetalhes();
 
     public boolean PodeSerEmprestado(){
         return this.Disponivel;
