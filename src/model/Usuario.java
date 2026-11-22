@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import exception.NomeInvalidoException;
 
-public class Usuario implements Serializable {
+public abstract class Usuario implements Serializable {
 
     private int id;
     private String nome;
@@ -15,6 +15,21 @@ public class Usuario implements Serializable {
         if (this.nome == null){
             throw new NomeInvalidoException();
         }
-        
+        this.id = id;
+        this.nome = nome;
+        this.login = login;
+        this.senha = senha;
+    }
+
+    public abstract void ExibirDados();
+
+    public int getId(){
+        return id;
+    }
+    public String getNome(){
+        return nome;
+    }
+    public String getLogin(){
+        return login;
     }
 }
