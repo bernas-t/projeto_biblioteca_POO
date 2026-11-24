@@ -22,4 +22,4 @@ public class Jornal extends MaterialBibliografico {
         return super.PodeSerEmprestado();
     }
 }
-}
+
