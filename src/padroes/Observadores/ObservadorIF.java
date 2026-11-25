@@ -1,5 +1,5 @@
 package padroes.Observadores;
 
 public interface ObservadorIF {
-    void atualizar();
+    void atualizar(String m);
 }

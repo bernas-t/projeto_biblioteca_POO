@@ -12,4 +12,9 @@ public class UsuarioComum extends Usuario{
         System.out.println("id: " + getId() + " nome: " + getNome() + " login: " + getLogin());
 
     }
+    
+    // @Override 
+    // public void atualizar(String m){
+    //     System.out.println();
+    //}
 }

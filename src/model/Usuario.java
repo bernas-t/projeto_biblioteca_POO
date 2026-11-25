@@ -3,8 +3,8 @@ package model;
 import java.io.Serializable;
 
 import exception.NomeInvalidoException;
-
-public abstract class Usuario implements Serializable {
+import padroes.Observadores.ObservadorIF;
+public abstract class Usuario implements Serializable, ObservadorIF {
 
     private int id;
     private String nome;
@@ -32,4 +32,9 @@ public abstract class Usuario implements Serializable {
     public String getLogin(){
         return login;
     }
+
+    // @Override 
+    // public void atualizar(String m){
+    //     System.out.println();
+    // }
 }
