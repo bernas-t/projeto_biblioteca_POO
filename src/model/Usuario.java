@@ -9,19 +9,29 @@ public abstract class Usuario implements Serializable, ObservadorIF {
     private int id;
     private String nome;
     private String login;
-    private String senha;
+    private String senhaHash;
+    private String cargo;
 
-    public Usuario(int id, String nome, String login, String senha) throws NomeInvalidoException{
+    public Usuario(int id, String nome, String login, String senhaHash, String cargo) throws NomeInvalidoException{
         if (this.nome == null){
             throw new NomeInvalidoException();
         }
         this.id = id;
         this.nome = nome;
         this.login = login;
-        this.senha = senha;
+        this.senhaHash = senhaHash;
+        this.cargo = cargo;
     }
 
-    public abstract void ExibirDados();
+    // falta criar essa e outras exceções mas to com preguiça
+    public boolean ValidarSenha(String sen) throws SenhaInvalidaException{
+        if (this.senhaHash == sen){
+            return true;
+        }else{
+            throw new SenhaInvalidaException();
+        }
+    }
+    // public abstract void ExibirDados();
 
     public int getId(){
         return id;
@@ -31,6 +41,9 @@ public abstract class Usuario implements Serializable, ObservadorIF {
     }
     public String getLogin(){
         return login;
+    }
+    public String getCargo(){
+        return cargo;
     }
 
     // @Override 

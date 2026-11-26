@@ -12,8 +12,8 @@ public class Bibliotecario extends Usuario{
 
     }
     
-    // @Override 
-    // public void atualizar(String m){
-    //     System.out.println();
-    //}
+    @Override 
+    public void atualizar(String m){
+        System.out.println();
+    }
 }

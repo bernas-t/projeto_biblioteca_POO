@@ -1,9 +1,9 @@
 package model;
-import java.io.Serializable;
-import java.io.ObjectInputFilter.Status;
+import exception.MaterialIndisponivelException;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
-import padroes.Strategy.CalculoMultaStrategy;
+// import padroes.Strategy.CalculoMultaStrategy;
 public class Emprestimo {
     private int id;
     private Usuario usuario;
@@ -11,28 +11,41 @@ public class Emprestimo {
     private LocalDate dataEmprestimo;
     private LocalDate dataPrevistaDevolucao;
     private LocalDate dataDevolucao;
-    private StatusEmprestimo status;
+    private int usuarioId;
+    private int materialId;
+
 
     public Emprestimo(int id, Usuario usuario, MaterialBibliografico material) {
         this.id = id;
         this.usuario = usuario;
         this.material = material;
+        this.usuarioId = usuario.getId();
+        this.materialId = material.getID();
         this.dataEmprestimo = LocalDate.now();
         this.dataPrevistaDevolucao = this.dataEmprestimo.plusDays(7);
-        this.status = StatusEmprestimo.Ativo;
+        this.dataDevolucao = null;
     }
 
-    public void RegistrarDevolucao() {
+    public void RegistrarDevolucao() throws MaterialIndisponivelException {
         this.dataDevolucao = LocalDate.now();
-        this.status = StatusEmprestimo.Devolvido;
-        this.material.AlterarDisponibilidade(true);
-        double DiasAtraso = double(dataPrevistaDevolucao) - (double.dataDevolucao);
-        
-        return CalculoMultaStrategy.CalcularMulta(DiasAtraso);
+        if (this.material != null){
+            this.material.MarcarComoDisponivel();
+        }else{
+            throw new MaterialIndisponivelException();
+        }
+    }
+    public double CalcularDiasAtraso(){
+        long diasAtraso = ChronoUnit.DAYS.between(this.dataPrevistaDevolucao, this.dataDevolucao);
+        return diasAtraso;
     }
 
-    public boolean EstaAtivo() {
-        return this.status == StatusEmprestimo.Ativo;
+    public boolean estaAtivo(){
+        if(this.dataDevolucao == null){
+            return true;
+        } 
+        else{
+            return false;
+        }
     }
 
     public int getID(){
@@ -53,8 +66,6 @@ public class Emprestimo {
     public LocalDate getDataDevolucao(){
         return dataDevolucao;
     }
-    public StatusEmprestimo getEstatus(){
-        return status;
-    }
 }
+
 
