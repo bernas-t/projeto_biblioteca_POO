@@ -1,6 +1,6 @@
 import java.math.BigDecimal;
 
-public class MultaComTeto implements ICalculoMultaStrategy {
+public class MultaComTeto implements CalculoMultaStrategy {
 	private BigDecimal precoDiario;
 	private BigDecimal valorLimite;
 	
