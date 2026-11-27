@@ -1,6 +1,6 @@
 import java.math.BigDecimal;
 
-public class MultaPorDia implements ICalculoMultaStrategy {
+public class MultaPorDia implements CalculoMultaStrategy {
 	private BigDecimal precoDiario;
 	
 	public MultaPorDia (BigDecimal precoDiario) {
