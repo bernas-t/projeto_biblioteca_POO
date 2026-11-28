@@ -31,7 +31,7 @@ public class Emprestimo {
         if (this.material != null){
             this.material.MarcarComoDisponivel();
         }else{
-            throw new MaterialIndisponivelException();
+            throw new MaterialIndisponivelException("Material não encontrado para devolução.");
         }
     }
     public double CalcularDiasAtraso(){

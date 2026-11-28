@@ -1,10 +1,9 @@
 package model;
 
-import java.io.Serializable;
-
 import exception.NomeInvalidoException;
-import padroes.Observadores.ObservadorIF;
-public abstract class Usuario implements Serializable, ObservadorIF {
+import exception.SenhaInvalidaException;
+import java.io.Serializable;
+public abstract class Usuario implements Serializable {
 
     private int id;
     private String nome;
@@ -14,7 +13,7 @@ public abstract class Usuario implements Serializable, ObservadorIF {
 
     public Usuario(int id, String nome, String login, String senhaHash, String cargo) throws NomeInvalidoException{
         if (this.nome == null){
-            throw new NomeInvalidoException();
+            throw new NomeInvalidoException("Nome não pode ser vazio");
         }
         this.id = id;
         this.nome = nome;
@@ -28,7 +27,7 @@ public abstract class Usuario implements Serializable, ObservadorIF {
         if (this.senhaHash == sen){
             return true;
         }else{
-            throw new SenhaInvalidaException();
+            throw new SenhaInvalidaException("Senha inválida.");
         }
     }
     // public abstract void ExibirDados();
@@ -46,8 +45,4 @@ public abstract class Usuario implements Serializable, ObservadorIF {
         return cargo;
     }
 
-    // @Override 
-    // public void atualizar(String m){
-    //     System.out.println();
-    // }
 }
