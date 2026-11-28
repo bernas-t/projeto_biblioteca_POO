@@ -1,16 +1,10 @@
 package controller;
 
 import exception.BibliotecaException;
-import exception.DadoInvalidoException;
-import exception.MaterialIndisponivelException;
-import java.text.Normalizer;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.stream.Collectors;
 import model.MaterialBibliografico;
 import model.Repositorio;
-import java.util.stream.Collectors;
 
 public class MaterialService {
     private Repositorio<MaterialBibliografico> repositorio;
@@ -21,7 +15,7 @@ public class MaterialService {
 
     public void cadastrar(MaterialBibliografico material) throws BibliotecaException {
         if (repositorio.buscarPorId(material.getID()) != null) {
-            throw new BibliotecaException("Já existe material com o ID " + material.getId());
+            throw new BibliotecaException("Já existe material com o ID " + material.getID());
         }
         repositorio.adicionar(material);
     }
