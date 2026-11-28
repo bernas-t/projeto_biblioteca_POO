@@ -3,7 +3,7 @@ package model;
 import exception.NomeInvalidoException;
 import exception.SenhaInvalidaException;
 import java.io.Serializable;
-public abstract class Usuario implements Serializable {
+public class Usuario implements Serializable {
 
     private int id;
     private String nome;
@@ -12,7 +12,7 @@ public abstract class Usuario implements Serializable {
     private String cargo;
 
     public Usuario(int id, String nome, String login, String senhaHash, String cargo) throws NomeInvalidoException{
-        if (this.nome == null){
+        if (this.nome == null || nome.trim().isEmpty()){
             throw new NomeInvalidoException("Nome não pode ser vazio");
         }
         this.id = id;
@@ -23,7 +23,7 @@ public abstract class Usuario implements Serializable {
     }
 
     // falta criar essa e outras exceções mas to com preguiça
-    public boolean ValidarSenha(String sen) throws SenhaInvalidaException{
+    public boolean validarSenha(String sen) throws SenhaInvalidaException{
         if (this.senhaHash == sen){
             return true;
         }else{

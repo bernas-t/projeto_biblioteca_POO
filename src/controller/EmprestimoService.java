@@ -1,104 +1,86 @@
-package service;
+package controller;
 
+import Strategy.ICalculoMultaStrategy;
 import exception.BibliotecaException;
-import exception.LimiteEmprestimosException;
-import exception.MaterialIndisponivelException;
-import exception.PersistenciaException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
 import model.Emprestimo;
 import model.MaterialBibliografico;
 import model.Repositorio;
-import strategy.CalculoMultaStrategy;
+import model.Usuario;
 
-/** PADRÃO STRATEGY (contexto): a política de multa é injetada pelo construtor. */
 public class EmprestimoService {
-    public static final int MAXIMO_EMPRESTIMOS_ATIVOS = 3;
+    private Repositorio<Emprestimo> repositorio;
+    private MaterialService materialService;
+    private ICalculoMultaStrategy multaStrategy;
+    public int MAXIMO_EMPRESTIMOS_ATIVOS = 3;
 
-    private final Repositorio<Emprestimo> repositorio;
-    private final UsuarioService usuarioService;
-    private final MaterialService materialService;
-    private final CalculoMultaStrategy multaStrategy;
-
-    public EmprestimoService(Repositorio<Emprestimo> repositorio, UsuarioService usuarioService,
-            MaterialService materialService, CalculoMultaStrategy multaStrategy) {
-        this.repositorio = Objects.requireNonNull(repositorio);
-        this.usuarioService = Objects.requireNonNull(usuarioService);
-        this.materialService = Objects.requireNonNull(materialService);
-        this.multaStrategy = Objects.requireNonNull(multaStrategy);
+    public EmprestimoService(Repositorio<Emprestimo> repositorio, MaterialService materialService, ICalculoMultaStrategy multaStrategy) {
+        this.repositorio = repositorio;
+        this.materialService = materialService;
+        this.multaStrategy = multaStrategy;
     }
 
-    public Emprestimo registrarEmprestimo(int usuarioId, int materialId) throws BibliotecaException {
-        usuarioService.buscarPorId(usuarioId);
+    public Emprestimo registrarEmprestimo(int usuarioId, int materialId, Usuario usuario) throws BibliotecaException {
+        if (usuario == null) {
+            throw new BibliotecaException("Usuário não encontrado.");
+        }
+
         MaterialBibliografico material = materialService.buscarPorId(materialId);
-
-        if (!material.isDisponivel()) {
-            throw new MaterialIndisponivelException("O material " + materialId + " já está emprestado.");
-        }
-        if (contarAtivosDoUsuario(usuarioId) >= MAXIMO_EMPRESTIMOS_ATIVOS) {
-            throw new LimiteEmprestimosException("O usuário já possui "
-                    + MAXIMO_EMPRESTIMOS_ATIVOS + " empréstimos ativos.");
+        if (material == null) {
+            throw new BibliotecaException("Material não encontrado.");
         }
 
-        Emprestimo emprestimo = new Emprestimo(repositorio.proximoId(), usuarioId, materialId);
-        repositorio.adicionar(emprestimo);
-        material.marcarComoIndisponivel();
-        try {
-            materialService.atualizar(material);
-        } catch (BibliotecaException e) {
-            material.marcarComoDisponivel();
-            try {
-                repositorio.remover(emprestimo.getId());
-            } catch (PersistenciaException falhaAoDesfazer) {
-                e.addSuppressed(falhaAoDesfazer);
-            }
-            throw e;
+        if (!material.PodeSerEmprestado()) {
+            throw new BibliotecaException("Material '" + material.getTitulo() + "' indisponível.");
         }
-        return emprestimo;
+
+        long ativos = listarPorUsuario(usuarioId).stream().filter(Emprestimo::estaAtivo).count();
+        if (ativos >= MAXIMO_EMPRESTIMOS_ATIVOS) {
+            throw new BibliotecaException("Limite de " + MAXIMO_EMPRESTIMOS_ATIVOS + " empréstimos ativos atingido.");
+        }
+
+        int novoId = repositorio.listarTodos().stream().mapToInt(Emprestimo::getID).max().orElse(0) + 1;
+        Emprestimo emp = new Emprestimo(novoId, usuario, material);
+        
+        material.MarcarComoIndisponivel();
+        materialService.atualizar(material);
+        repositorio.adicionar(emp);
+        return emp;
     }
 
     public BigDecimal registrarDevolucao(int emprestimoId) throws BibliotecaException {
-        Emprestimo emprestimo = repositorio.buscarPorId(emprestimoId);
-        if (emprestimo == null) {
-            throw new BibliotecaException("Empréstimo " + emprestimoId + " não encontrado.");
+        Emprestimo emp = repositorio.buscarPorId(emprestimoId);
+        if (emp == null || !emp.estaAtivo()) {
+            throw new BibliotecaException("Empréstimo inválido ou já encerrado.");
         }
-        MaterialBibliografico material = materialService.buscarPorId(emprestimo.getMaterialId());
 
-        emprestimo.registrarDevolucao();
-        BigDecimal multa = calcularMulta(emprestimo);
-        material.marcarComoDisponivel();
-        repositorio.atualizar(emprestimo);
-        materialService.atualizar(material);
-        return multa;
+        emp.RegistrarDevolucao();
+        
+        // Atualiza também no repositório de materiais para persistir a disponibilidade
+        MaterialBibliografico mat = materialService.buscarPorId(emp.getMaterialId());
+        if (mat != null) {
+            mat.MarcarComoDisponivel();
+            materialService.atualizar(mat);
+        }
+
+        repositorio.atualizar(emp);
+        return calcularMulta(emp);
     }
 
     public BigDecimal calcularMulta(Emprestimo emprestimo) {
-        return multaStrategy.calcular(emprestimo.calcularDiasAtraso());
+        double diasAtraso = emprestimo.CalcularDiasAtraso();
+        return multaStrategy.calcular((long) diasAtraso);
+    }
+
+    public List<Emprestimo> listarPorUsuario(int usuarioId) {
+        return repositorio.listarTodos().stream()
+                .filter(e -> e.getUsuarioId() == usuarioId)
+                .collect(Collectors.toList());
     }
 
     public List<Emprestimo> listarTodos() {
         return repositorio.listarTodos();
-    }
-
-    public List<Emprestimo> listarPorUsuario(int usuarioId) {
-        List<Emprestimo> doUsuario = new ArrayList<>();
-        for (Emprestimo emprestimo : repositorio.listarTodos()) {
-            if (emprestimo.getUsuarioId() == usuarioId) {
-                doUsuario.add(emprestimo);
-            }
-        }
-        return doUsuario;
-    }
-
-    public int contarAtivosDoUsuario(int usuarioId) {
-        int ativos = 0;
-        for (Emprestimo emprestimo : listarPorUsuario(usuarioId)) {
-            if (emprestimo.estaAtivo()) {
-                ativos++;
-            }
-        }
-        return ativos;
     }
 }

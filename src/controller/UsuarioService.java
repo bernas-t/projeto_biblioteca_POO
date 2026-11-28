@@ -1,87 +1,47 @@
-package service;
+package controller;
 
+import Singleton.sessao;
 import exception.BibliotecaException;
-import exception.DadoInvalidoException;
 import java.util.List;
-import java.util.Objects;
 import model.Cargo;
-import model.Sessao;
-import model.Usuario;
 import model.Repositorio;
+import model.Usuario;
 
 public class UsuarioService {
-    private final Repositorio<Usuario> repositorio;
+    private Repositorio<Usuario> repositorio;
 
     public UsuarioService(Repositorio<Usuario> repositorio) {
-        this.repositorio = Objects.requireNonNull(repositorio);
+        this.repositorio = repositorio;
     }
 
-    public Usuario cadastrar(String nome, String login, String senha, Cargo cargo)
-            throws BibliotecaException {
-        if (login != null && buscarPorLogin(login) != null) {
-            throw new DadoInvalidoException("O login '" + login.trim() + "' já está em uso.");
+    public Usuario cadastrar(String nome, String login, String senha, Cargo cargo) throws BibliotecaException {
+        for (Usuario u : repositorio.listarTodos()) {
+            if (u.getLogin().equalsIgnoreCase(login)) {
+                throw new BibliotecaException("Login já cadastrado no sistema.");
+            }
         }
-        Usuario usuario = new Usuario(repositorio.proximoId(), nome, login, senha, cargo);
-        repositorio.adicionar(usuario);
-        return usuario;
+        int novoId = repositorio.listarTodos().stream().mapToInt(Usuario::getId).max().orElse(0) + 1;
+        Usuario novo = new Usuario(novoId, nome, login, senha, cargo.name());
+        
+        repositorio.adicionar(novo);
+        return novo;
     }
 
     public void logar(String login, String senha) throws BibliotecaException {
-        Usuario usuario = (login == null) ? null : buscarPorLogin(login);
-        if (usuario == null || !usuario.autenticar(senha)) {
-            throw new BibliotecaException("Login ou senha inválidos.");
+        for (Usuario u : repositorio.listarTodos()) {
+            if (u.getLogin().equalsIgnoreCase(login) && u.validarSenha(senha)) {
+                sessao.getInstancia().iniciarSessao(u);
+                return;
+            }
         }
-        Sessao.getInstancia().iniciarSessao(usuario);
-    }
-
-    public Usuario getUsuarioLogado() {
-        return Sessao.getInstancia().getUsuarioLogado();
-    }
-
-    public void deslogar() {
-        Sessao.getInstancia().encerrarSessao();
-    }
-
-    public Usuario buscarPorId(int id) throws BibliotecaException {
-        Usuario usuario = repositorio.buscarPorId(id);
-        if (usuario == null) {
-            throw new BibliotecaException("Usuário " + id + " não encontrado.");
-        }
-        return usuario;
+        throw new BibliotecaException("Login ou senha inválidos.");
     }
 
     public List<Usuario> listar() {
         return repositorio.listarTodos();
     }
 
-    public void atualizarNome(int id, String novoNome) throws BibliotecaException {
-        Usuario usuario = buscarPorId(id);
-        usuario.alterarNome(novoNome);
-        repositorio.atualizar(usuario);
-    }
-
-    public void atualizarSenha(int id, String novaSenha) throws BibliotecaException {
-        Usuario usuario = buscarPorId(id);
-        usuario.alterarSenha(novaSenha);
-        repositorio.atualizar(usuario);
-    }
-
     public void remover(int id) throws BibliotecaException {
-        buscarPorId(id);
-        Usuario logado = Sessao.getInstancia().getUsuarioLogado();
-        if (logado != null && logado.getId() == id) {
-            throw new BibliotecaException("Não é possível remover o usuário logado.");
-        }
         repositorio.remover(id);
-    }
-
-    private Usuario buscarPorLogin(String login) {
-        String procurado = login.trim();
-        for (Usuario usuario : repositorio.listarTodos()) {
-            if (usuario.getLogin().equalsIgnoreCase(procurado)) {
-                return usuario;
-            }
-        }
-        return null;
     }
 }

@@ -4,7 +4,7 @@ import exception.MaterialIndisponivelException;
 public class Periodico extends MaterialBibliografico{
     private int NumeroEdicao;
 
-    public Periodico(int NumeroEdicao,int id, String titulo, int AnoPublicacao)throws MaterialIndisponivelException{
+    public Periodico(int id, String titulo, int AnoPublicacao, int NumeroEdicao)throws MaterialIndisponivelException{
         super(id,titulo,AnoPublicacao );
         this.NumeroEdicao = NumeroEdicao;
 

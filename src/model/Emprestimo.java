@@ -66,6 +66,12 @@ public class Emprestimo {
     public LocalDate getDataDevolucao(){
         return dataDevolucao;
     }
+    public int getUsuarioId() { 
+        return usuarioId; 
+    }
+    public int getMaterialId() { 
+        return materialId; 
+    }
 }
 
 

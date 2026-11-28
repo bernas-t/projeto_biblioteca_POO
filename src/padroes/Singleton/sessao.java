@@ -1,4 +1,4 @@
-package padroes.Singleton;
+package Singleton;
 
 import model.Usuario;
 
