@@ -19,7 +19,7 @@ public abstract class MaterialBibliografico implements Serializable {
     this.Disponivel = true;        
     }
 
-    public abstract void ExibirDetalhes();
+    public abstract String ExibirDetalhes();
 
     public void MarcarComoDisponivel(){
         this.Disponivel = true;

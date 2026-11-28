@@ -1,10 +1,11 @@
 package model;
 import exception.MaterialIndisponivelException;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 // import padroes.Strategy.CalculoMultaStrategy;
-public class Emprestimo {
+public class Emprestimo implements Serializable {
     private int id;
     private Usuario usuario;
     private MaterialBibliografico material;

@@ -12,8 +12,8 @@ public class Livro extends MaterialBibliografico{
         this.autor = autor;
     }
     @Override 
-    public void ExibirDetalhes(){
-        System.out.println("Id: "+ super.getID() + " ,Titulo: "+super.getTitulo() + " ,Autor: "+autor +" ,Isbn: "+ isbn + " ,disponivel: " + super.PodeSerEmprestado());
+    public String ExibirDetalhes(){
+        return "Id: "+ super.getID() + " ,Titulo: "+super.getTitulo() + " ,Autor: "+autor +" ,Isbn: "+ isbn + " ,disponivel: " + super.PodeSerEmprestado();
     }
 
     public String getIsbn(){

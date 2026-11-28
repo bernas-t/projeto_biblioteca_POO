@@ -10,8 +10,8 @@ public class Periodico extends MaterialBibliografico{
 
     }
     @Override 
-    public void ExibirDetalhes(){
-        System.out.println("Id: "+ super.getID() + " ,Titulo: " + super.getTitulo() + " ,Ano de publicação; " + getAnoPublicacao() + " ,Numero de edição: " + NumeroEdicao);
+    public String ExibirDetalhes(){
+        return "Id: "+ super.getID() + " ,Titulo: " + super.getTitulo() + " ,Ano de publicação; " + getAnoPublicacao() + " ,Numero de edição: " + NumeroEdicao;
     }
     public int getNumeroEdicao(){
         return NumeroEdicao;
